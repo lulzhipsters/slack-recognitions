@@ -1,22 +1,39 @@
-import { SlackWatch } from '/SlackWatch';
-import { ReactionStore } from '/ReactionStore';
+const SlackWatch = require('./SlackWatch');
+const ReactionStore = require('./ReactionStore');
+const config = require('./config');
 
-console.log('starting up');
-
-let store = new ReactionStore();
-
-let storeTrackedReaction = function(reaction) {
-    if(reaction.reaction === "thumbsup") {
-        store.addReaction(r);
-    }
-};
-
-let removeTrackedReaction = function(reaction) {
-    if(reaction.reaction === "thumbsup") {
-        store.removeReaction(reaction);
-    }
+let wait = function(){
+    setTimeout(wait, 10000);
+    console.log('still watching');
 }
 
-let watcher = new SlackWatch();
-watcher.onReaction(storeTrackedReaction())
-watcher.onReactionRemoved(removeTrackedReaction)
+let isTracked = function(reactionName){
+    return config.trackedReactions.indexOf(reactionName) >= 0;
+}
+
+let app = function(){
+    console.log('starting up');
+
+    let store = new ReactionStore();
+
+    let storeTrackedReaction = function(reaction) {
+        if(isTracked(reaction.reaction)) {
+            store.addReaction(reaction);
+        }
+    };
+
+    let removeTrackedReaction = function(reaction) {
+        if(isTracked(reaction.reaction)) {
+            store.removeReaction(reaction);
+        }
+    }
+
+    let watcher = new SlackWatch();
+    watcher.onReaction(storeTrackedReaction)
+    watcher.onReactionRemoved(removeTrackedReaction)
+
+    wait();
+}
+
+//look at using nssm to run this in windows, or add win service handler here.
+app();

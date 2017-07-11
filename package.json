@@ -4,6 +4,7 @@
   "description": "give awards to your team via emojis",
   "main": "main.js",
   "scripts": {
+    "start": "node main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
