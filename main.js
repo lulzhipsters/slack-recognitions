@@ -28,9 +28,14 @@ let app = function(){
         }
     }
 
+    let displayLeaderboard = function(reaction) {
+        store.getStoreStats();
+    }
+
     let watcher = new SlackWatch();
-    watcher.onReaction(storeTrackedReaction)
-    watcher.onReactionRemoved(removeTrackedReaction)
+    watcher.onReaction(storeTrackedReaction);
+    watcher.onReactionRemoved(removeTrackedReaction);
+    watcher.onLeaderboardRequest(displayLeaderboard);
 
     wait();
 }
