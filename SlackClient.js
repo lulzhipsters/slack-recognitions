@@ -28,6 +28,15 @@ class SlackClient {
         });
     }
 
+    onHelp(f){
+        this.rtm.on(RTM_EVENTS.MESSAGE, (message) => {
+            if(message.text.includes(this.rtm.activeUserId)
+                && message.text.includes('help')){
+                    f(message);
+                }
+        });
+    }
+
     writeToChannel(message, channel) {
         if(this.rtm.connected){
             this.rtm.sendMessage(message, channel);

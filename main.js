@@ -10,8 +10,8 @@ let wait = function(){
 
 let isTracked = function(reaction){
     return config.trackedReactions.indexOf(reaction.reaction) >= 0 //is in tracked list
-    && reaction.item_user != undefined //item was posted by user, not by slack
-    && reaction.user != reaction.item_user; //is not a reaction on own item
+    && reaction.item_user != undefined; //item was posted by user, not by slack
+    //&& reaction.user != reaction.item_user; //is not a reaction on own item
 }
 
 let slack = new SlackClient();
@@ -47,9 +47,20 @@ let app = function(){
         store.forAllReactions(groupReactionsByUser);
     }
 
+    let displayHelp = function(requestMessage) {
+        let trackedString = config.trackedReactions.map((r) => {
+            return `:${r}:`;
+        }).join(" ");
+
+        let msg = `React to team members with any of the following to show your appreciation: ${trackedString}\n Tag me and type 'leaderboard' or 'stats' to see how many you've received`;
+
+        slack.writeToChannel(msg, requestMessage.channel);
+    }
+
     slack.onReaction(storeTrackedReaction);
     slack.onReactionRemoved(removeTrackedReaction);
     slack.onLeaderboardRequest(displayLeaderboard);
+    slack.onHelp(displayHelp);
 
     wait();
 }
