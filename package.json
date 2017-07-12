@@ -16,6 +16,6 @@
   "homepage": "https://bitbucket.org/lulzhipsters/slack-recognitions#readme",
   "dependencies": {
     "@slack/client": "^3.10.0",
-    "simple-node-db": "^0.91.14"
+    "nedb": "^1.8.0"
   }
 }

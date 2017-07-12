@@ -1,12 +1,11 @@
 const RtmClient = require('@slack/client').RtmClient;
 const RTM_EVENTS = require('@slack/client').RTM_EVENTS;
-const WebClient = require('@slack/client').WebClient;
+const CLIENT_EVENTS = require('@slack/client').CLIENT_EVENTS;
 const config = require('./config');
 
-class SlackWatch {
+class SlackClient {
     constructor(){
         this.rtm = new RtmClient(config.slackToken);
-        this.web = new WebClient(config.slackToken);
 
         let results = this.rtm.connect('https://q-mmittest.slack.com');
     }
@@ -28,6 +27,17 @@ class SlackWatch {
             }
         });
     }
+
+    writeToChannel(message, channel) {
+        if(this.rtm.connected){
+            this.rtm.sendMessage(message, channel);
+        }
+        else {
+            this.rtm.on(CLIENT_EVENTS.RTM.RTM_CONNECTION_OPENED, () => {
+                this.rtm.sendMessage(message, channel);
+            });
+        }
+    }
 }
 
-module.exports = SlackWatch;
+module.exports = SlackClient;

@@ -1,48 +1,52 @@
 const config = require('./config');
-const SimpleDb = require('simple-node-db');
+const DataStore = require('nedb');
 
 class ReactionStore {
     constructor(){
-        this.db = new SimpleDb(config.dbDir)
+        this.db = new DataStore(config.dbFile);
+        this.db.persistence.setAutocompactionInterval(360000);
+        this.db.loadDatabase();
     }
 
     addReaction(reaction){
-        let key = this.reactionKey(reaction);
-
-        const callback = function(err, model) {
-            console.log("Stored: " + key);
-        };
-
-        this.db.insert( key, reaction, callback)
+        this.db.insert(reaction, (err, newDoc) => {
+            if(err){
+                console.error(JSON.stringify(err));
+            } else {
+                console.log("Added: " + JSON.stringify(newDoc));
+            }
+        });
     }
 
     removeReaction(reaction){
-        let key = this.reactionKey(reaction);
-
-        console.log("Deleting: " + key);
-        this.db.delete(key);
-    }
-
-    getStoreStats(){
-        this.db.queryKeys({}, console.log)
-        this.db.stats(console.log);
-    }
-
-    reactionKey(reaction){
-        let itemKeyPart;
-        let item = reaction.item;
-
-        if(item.type === 'message'){
-            itemKeyPart = `{${item.type}-${item.channel}-${item.ts}}`;
-        } else if(item.type === 'file'){
-            itemKeyPart = `{${item.type}-${item.file}}`;
-        } else if(item.type === 'file_comment'){
-            itemKeyPart = `{${item.type}-${item.file_comment}-${item.file}}`;
-        } else {
-            throw 'unknown item type';
+        var key = {
+            "user": reaction.user,
+            "reaction": reaction.reaction
         }
 
-        return this.db.createDomainKey('reaction', `${reaction.user}-${reaction.item_user}-${reaction.reaction}-${itemKeyPart}`);
+        if(reaction.item_user) key["item_user"] = reaction.item_user;
+        if(reaction.item.type) key["item.type"] = reaction.item.type;
+        if(reaction.item.channel) key["item.channel"] = reaction.item.channel;
+        if(reaction.item.file) key["item.file"] = reaction.item.file;
+        if(reaction.item.file_comment) key["item.file_comment"] = reaction.item.file_comment;
+
+        this.db.remove(key, (err, number) => {
+            if(err){
+                console.error(JSON.stringify(err));
+            } else {
+                console.log(`Removed ${number} records`);
+            }
+        })
+    }
+
+    forAllReactions(f){
+        return this.db.find({}, (err, reactions) =>{
+            if(err){
+                console.error(err);
+            } else {
+                f(reactions)
+            }
+        });
     }
 }
 
