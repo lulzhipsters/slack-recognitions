@@ -7,7 +7,7 @@ class SlackClient {
     constructor(){
         this.rtm = new RtmClient(config.slackToken);
 
-        let results = this.rtm.connect('https://q-mmittest.slack.com');
+        let results = this.rtm.connect(config.slackUrl);
     }
 
     onReaction(f){
@@ -21,7 +21,8 @@ class SlackClient {
     //bot tagged and message incl. 'leaderboard' or 'stats'
     onLeaderboardRequest(f){
         this.rtm.on(RTM_EVENTS.MESSAGE, (message) => {
-            if(message.text.includes(this.rtm.activeUserId) 
+            if(this.messageSupported(message)
+                && message.text.includes(this.rtm.activeUserId) 
                 && (message.text.includes('leaderboard') || message.text.includes('stats'))){
                 f(message);
             }
@@ -30,7 +31,8 @@ class SlackClient {
 
     onHelp(f){
         this.rtm.on(RTM_EVENTS.MESSAGE, (message) => {
-            if(message.text.includes(this.rtm.activeUserId)
+            if(this.messageSupported(message)
+                && message.text.includes(this.rtm.activeUserId)
                 && message.text.includes('help')){
                     f(message);
                 }
@@ -46,6 +48,11 @@ class SlackClient {
                 this.rtm.sendMessage(message, channel);
             });
         }
+    }
+
+    messageSupported(message){
+        if(message.subtype === "message_changed") return false;
+        return true;
     }
 }
 

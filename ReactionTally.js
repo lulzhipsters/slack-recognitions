@@ -14,26 +14,36 @@ class ReactionTally {
         if(userCount === undefined){
             userCount = { 
                 user: user,
-                total: 1
+                total: 1,
+                reactions: {}
             };
-            userCount[reactionText] = 1;
+            userCount.reactions[reactionText] = 1;
 
             this.userCounts.push(userCount);
         } else {
-            if(userCount[reactionText] > 0){
-                userCount[reactionText]++;
+            if(userCount.reactions[reactionText] > 0){
+                userCount.reactions[reactionText]++;
+                userCount.total++;
             } else {
-                userCount[reactionText] = 1;
+                userCount.reactions[reactionText] = 1;
+                userCount.total++;
             }
         }
     }
 
     toString(){
-        let outCount = this.userCounts.slice();
-        outCount.sort((a,b) => b.total - a.total);
+        this.userCounts.sort((a,b) => b.total - a.total);
 
-        let userStrings = outCount.map((c) => {
-            return `<@${c.user}> has a total of ${c.total} awards`;
+        // let cn = this.userCounts[0];
+        // let rx = Object.keys(cn.reactions).filter((k) => cn.hasOwnProperty);
+        // let str = `:${rx}:x${cn.reactions[rx[0]]}`;
+
+        let userStrings = this.userCounts.map((c) => {
+            let reactions = Object.keys(c.reactions)
+                .map(p => `:${p}:x${c.reactions[p]}`)
+                .join(" ");
+
+            return `<@${c.user}> has ${c.total} award(s): ${reactions}`;
         });
 
         return userStrings.join('\n')

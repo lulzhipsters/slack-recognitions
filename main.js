@@ -10,8 +10,8 @@ let wait = function(){
 
 let isTracked = function(reaction){
     return config.trackedReactions.indexOf(reaction.reaction) >= 0 //is in tracked list
-    && reaction.item_user != undefined; //item was posted by user, not by slack
-    //&& reaction.user != reaction.item_user; //is not a reaction on own item
+    && reaction.item_user != undefined //item was posted by user, not by slack
+    && reaction.user != reaction.item_user; //is not a reaction on own item
 }
 
 let slack = new SlackClient();
