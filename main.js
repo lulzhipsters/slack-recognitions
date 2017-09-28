@@ -1,6 +1,7 @@
 const SlackClient = require('./SlackClient');
 const ReactionStore = require('./ReactionStore');
 const ReactionTally = require('./ReactionTally');
+const Scheduler = require('./Scheduler');
 const config = require('./config');
 
 let wait = function(){
@@ -11,7 +12,7 @@ let wait = function(){
 let isTracked = function(reaction){
     return config.trackedReactions.indexOf(reaction.reaction) >= 0 //is in tracked list
     && reaction.item_user != undefined //item was posted by user, not by slack
-    && reaction.user != reaction.item_user; //is not a reaction on own item
+    && (reaction.user != reaction.item_user || config.devMode); //is not a reaction on own item
 }
 
 let slack = new SlackClient();
@@ -33,18 +34,43 @@ let app = function(){
         }
     }
 
-    let displayLeaderboard = function(requestMessage) {
-        let groupReactionsByUser = function(reactions) {
-            let tally = new ReactionTally();
+    let groupReactionsByUser = function(reactions) {
+        let tally = new ReactionTally();
 
+        reactions.forEach(function(r) {
+            tally.countReaction(r.item_user, r.reaction)
+        }, this);
+
+        slack.writeToChannel(tally.toString(), requestMessage.channel)
+    }
+
+    let displayLeaderboard = function(requestMessage) {
+        store.forAllReactions((reactions) => {
+            let tally = new ReactionTally();
+    
             reactions.forEach(function(r) {
                 tally.countReaction(r.item_user, r.reaction)
             }, this);
-
+    
             slack.writeToChannel(tally.toString(), requestMessage.channel)
-        }
+        });
+    }
 
-        store.forAllReactions(groupReactionsByUser);
+    let displaySummary = function(sinceDateTime) {
+        store.forAllReactionsSince((reactions) => {
+            let tally = new ReactionTally();
+    
+            reactions.forEach(function(r) {
+                tally.countReaction(r.item_user, r.reaction)
+            }, this);
+            
+            if(tally.toString()){
+                slack.writeToChannel(config.summaryIntroText, config.summaryOutputChannel);
+                slack.writeToChannel(tally.toString(), config.summaryOutputChannel);
+            } else {
+                slack.writeToChannel(config.summaryNoAwardsText, config.summaryOutputChannel);
+            }            
+        }, sinceDateTime);
     }
 
     let displayHelp = function(requestMessage) {
@@ -62,8 +88,10 @@ let app = function(){
     slack.onLeaderboardRequest(displayLeaderboard);
     slack.onHelp(displayHelp);
 
+    let scheduler = new Scheduler();
+    scheduler.onScheduledSummary(displaySummary)
+
     wait();
 }
 
-//look at using nssm to run this in windows, or add win service handler here.
 app();

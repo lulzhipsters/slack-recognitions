@@ -34,10 +34,6 @@ class ReactionTally {
     toString(){
         this.userCounts.sort((a,b) => b.total - a.total);
 
-        // let cn = this.userCounts[0];
-        // let rx = Object.keys(cn.reactions).filter((k) => cn.hasOwnProperty);
-        // let str = `:${rx}:x${cn.reactions[rx[0]]}`;
-
         let userStrings = this.userCounts.map((c) => {
             let reactions = Object.keys(c.reactions)
                 .map(p => `:${p}:x${c.reactions[p]}`)

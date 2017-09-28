@@ -3,7 +3,7 @@ const DataStore = require('nedb');
 
 class ReactionStore {
     constructor(){
-        this.db = new DataStore(config.dbFile);
+        this.db = new DataStore(config.reactionDbFile);
         this.db.persistence.setAutocompactionInterval(360000);
         this.db.loadDatabase();
     }
@@ -47,6 +47,18 @@ class ReactionStore {
                 f(reactions)
             }
         });
+    }
+
+    forAllReactionsSince(f, sinceDate){
+        let sinceDateSeconds = sinceDate.valueOf() / 1000;
+
+        return this.db.find({}, (err, reactions) => {
+            if(err){
+                console.error(err);
+            } else {
+                f(reactions.filter(r => parseInt(r.ts) > sinceDateSeconds));
+            }
+        })
     }
 }
 
