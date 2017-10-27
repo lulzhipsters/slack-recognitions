@@ -8,5 +8,6 @@ module.exports = {
     summaryOutputChannel: "C0B0U1EE6",
     summaryIntroText: "Awards for this week",
     summaryNoAwardsText: "Couldn't find any awards for this week. Either I'm doing something wrong or you are",
-    devMode: true
+    devMode: true,
+    ignoreUsers: ["U6863K4GM"]
 }

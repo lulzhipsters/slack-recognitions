@@ -12,6 +12,7 @@ let wait = function(){
 let isTracked = function(reaction){
     return config.trackedReactions.indexOf(reaction.reaction) >= 0 //is in tracked list
     && reaction.item_user != undefined //item was posted by user, not by slack
+    && config.ignoreUsers.indexOf(reaction.item_user) != -1 // user is not in ignore list
     && (reaction.user != reaction.item_user || config.devMode); //is not a reaction on own item
 }
 
@@ -49,7 +50,9 @@ let app = function(){
             let tally = new ReactionTally();
     
             reactions.forEach(function(r) {
-                tally.countReaction(r.item_user, r.reaction)
+                if(isTracked(r)){
+                    tally.countReaction(r.item_user, r.reaction);
+                }
             }, this);
     
             slack.writeToChannel(tally.toString(), requestMessage.channel)
