@@ -1,19 +1,14 @@
 {
   "name": "slack-recognitions",
-  "version": "1.0.0",
+  "version": "0.2.0",
   "description": "give awards to your team via emojis",
   "main": "main.js",
   "scripts": {
     "start": "node main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://bitbucket.org/lulzhipsters/slack-recognitions.git"
-  },
   "author": "Lewis Hopkins",
-  "license": "ISC",
-  "homepage": "https://bitbucket.org/lulzhipsters/slack-recognitions#readme",
+  "license": "MIT",
   "dependencies": {
     "@slack/client": "^3.10.0",
     "later": "^1.2.0",
