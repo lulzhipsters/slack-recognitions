@@ -10,10 +10,15 @@ let wait = function(){
 }
 
 let isTracked = function(reaction){
-    return config.trackedReactions.indexOf(reaction.reaction) >= 0 //is in tracked list
-    && reaction.item_user != undefined //item was posted by user, not by slack
-    && config.ignoreUsers.indexOf(reaction.item_user) != -1 // user is not in ignore list
-    && (reaction.user != reaction.item_user || config.devMode); //is not a reaction on own item
+    let isTrackedReaction = config.trackedReactions.indexOf(reaction.reaction) >= 0;
+    let postedByUser = reaction.item_user !== undefined; //item was posted by user, not by slack
+    let userIsIgnored = config.ignoreUsers.find(i => i === reaction.item_user) !== undefined;//.indexOf(reaction.item_user) != -1; // user is not in ignore list
+    let reactionIsNotToOwnPost = (reaction.user != reaction.item_user || config.devMode); //is not a reaction on own item
+
+    return  isTrackedReaction
+        && postedByUser
+        && !userIsIgnored
+        && reactionIsNotToOwnPost;
 }
 
 let slack = new SlackClient();
@@ -54,8 +59,14 @@ let app = function(){
                     tally.countReaction(r.item_user, r.reaction);
                 }
             }, this);
+
+            let leaderboard = tally.leaderboard();
+
+            let msg = leaderboard.none
+                ? "No awards found"
+                : leaderboard.leaderboardText;
     
-            slack.writeToChannel(tally.toString(), requestMessage.channel)
+            slack.writeToChannel(msg, requestMessage.channel);
         });
     }
 
@@ -64,15 +75,20 @@ let app = function(){
             let tally = new ReactionTally();
     
             reactions.forEach(function(r) {
-                tally.countReaction(r.item_user, r.reaction)
+                if(isTracked(r)){
+                    tally.countReaction(r.item_user, r.reaction)
+                }
             }, this);
+
+            let leaderboard = tally.leaderboard();
             
-            if(tally.toString()){
+            if(leaderboard.none){
+                slack.writeToChannel(config.summaryNoAwardsText, config.summaryOutputChannel);
+            } else {
                 slack.writeToChannel(config.summaryIntroText, config.summaryOutputChannel);
                 slack.writeToChannel(tally.toString(), config.summaryOutputChannel);
-            } else {
-                slack.writeToChannel(config.summaryNoAwardsText, config.summaryOutputChannel);
-            }            
+            }
+
         }, sinceDateTime);
     }
 
@@ -92,7 +108,7 @@ let app = function(){
     slack.onHelp(displayHelp);
 
     let scheduler = new Scheduler();
-    scheduler.onScheduledSummary(displaySummary)
+    scheduler.onScheduledSummary(displaySummary);
 
     wait();
 }

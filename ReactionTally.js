@@ -31,18 +31,22 @@ class ReactionTally {
         }
     }
 
-    toString(){
+    leaderboard(){
+        if(this.userCounts.length === 0){
+            return { none: true }
+        }
+
         this.userCounts.sort((a,b) => b.total - a.total);
 
-        let userStrings = this.userCounts.map((c) => {
+        let text = this.userCounts.map((c) => {
             let reactions = Object.keys(c.reactions)
                 .map(p => `:${p}:x${c.reactions[p]}`)
                 .join(" ");
 
             return `<@${c.user}> has ${c.total} award(s): ${reactions}`;
-        });
+        }).join('\n');
 
-        return userStrings.join('\n')
+        return { none: false, leaderboardText: text}
     }
 }
 
