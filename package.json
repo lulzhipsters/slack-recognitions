@@ -1,6 +1,6 @@
 {
   "name": "slack-recognitions",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "give awards to your team via emojis",
   "main": "main.js",
   "scripts": {

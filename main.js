@@ -111,6 +111,6 @@ let app = function(){
     scheduler.onScheduledSummary(displaySummary);
 
     wait();
-}
+};
 
 app();
