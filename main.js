@@ -86,7 +86,7 @@ let app = function(){
                 slack.writeToChannel(config.summaryNoAwardsText, config.summaryOutputChannel);
             } else {
                 slack.writeToChannel(config.summaryIntroText, config.summaryOutputChannel);
-                slack.writeToChannel(tally.toString(), config.summaryOutputChannel);
+                slack.writeToChannel(leaderboard.leaderboardText, config.summaryOutputChannel);
             }
 
         }, sinceDateTime);
