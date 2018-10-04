@@ -1,1 +1,3 @@
-Slack interactions bot
+Slack interactions bot:
+
+slack > teams
