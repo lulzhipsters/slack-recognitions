@@ -5,7 +5,7 @@ class ReactionTally {
     }
     
     countReaction(user, reactionText) {
-        if(user === undefined){
+        if(user === undefined || reactionText === undefined){
             return;
         }
 
